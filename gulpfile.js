@@ -1,4 +1,3 @@
-
 let project_folder = require("path").basename(__dirname);
 let source_folder = "#src";
 
@@ -46,7 +45,8 @@ let { src, dest } = require('gulp'),
 	svgSprite = require('gulp-svg-sprite'),
 	ttf2woff = require('gulp-ttf2woff'),
 	ttf2woff2 = require('gulp-ttf2woff2'),
-	fonter = require('gulp-fonter');
+	concat = require('gulp-concat');
+fonter = require('gulp-fonter');
 
 function browserSync(params) {
 	browsersync.init({
@@ -66,6 +66,18 @@ function html() {
 		.pipe(browsersync.stream())
 }
 
+function libsCss() {
+	return gulp.src([
+		'node_modules/normalize.css/normalize.css',
+		'node_modules/swiper/swiper-bundle.css',
+		'node_modules/lightbox2/dist/css/lightbox.css',
+	])
+		.pipe(concat("libs.min.css"))
+		.pipe(clean_css())
+		.pipe(dest(path.build.css))
+		.pipe(browsersync.stream())
+}
+
 function css() {
 	return src(path.src.css)
 		.pipe(
@@ -78,7 +90,8 @@ function css() {
 		)
 		.pipe(
 			autoprefixer({
-				overrideBrowserslist: ["last 5 versions"],
+				grid: true,
+				overrideBrowserslist: ["last 12 versions"],
 				cascade: true
 			})
 		)
@@ -91,6 +104,19 @@ function css() {
 			})
 		)
 		.pipe(dest(path.build.css))
+		.pipe(browsersync.stream())
+}
+
+function libsJs() {
+	return gulp.src([
+		'node_modules/swiper/swiper-bundle.js',
+		'node_modules/lightbox2/dist/js/lightbox.js',
+	])
+		.pipe(concat("libs.min.js"))
+		.pipe(
+			uglify()
+		)
+		.pipe(dest(path.build.js))
 		.pipe(browsersync.stream())
 }
 
@@ -197,13 +223,15 @@ function clean(params) {
 	return del(path.clean);
 }
 
-let build = gulp.series(clean, gulp.parallel(js, css, html, images, fonts), fontsStyle);
+let build = gulp.series(clean, gulp.parallel(libsJs, js, libsCss, css, html, images, fonts), fontsStyle);
 let watch = gulp.parallel(build, watchFiles, browserSync);
 
 exports.fontsStyle = fontsStyle;
 exports.fonts = fonts;
 exports.images = images;
 exports.js = js;
+exports.libsCss = libsCss;
+exports.libsJs = libsJs;
 exports.css = css;
 exports.html = html;
 exports.build = build;
