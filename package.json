@@ -30,6 +30,6 @@
     "gulp-webpcss": "^1.1.1",
     "lightbox2": "^2.11.3",
     "normalize.css": "^8.0.1",
-    "swiper": "^6.1.2"
+    "swiper": "^6.5.1"
   }
 }
